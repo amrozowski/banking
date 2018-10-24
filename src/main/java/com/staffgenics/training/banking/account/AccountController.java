@@ -24,7 +24,7 @@ public class AccountController {
   public AccountDto getAccount(@PathVariable Long id) { return accountService.getAccount(id); }
 
   @RequestMapping(value = "/account/{id}", method = RequestMethod.PUT)
-  public void createClient(@RequestBody AccountDto accountDto, @PathVariable Long id) {
+  public void createAccount(@RequestBody AccountDto accountDto, @PathVariable Long id) {
     accountService.editAccount(accountDto, id);
   }
 
