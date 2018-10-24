@@ -1,6 +1,5 @@
 package com.staffgenics.training.banking.account;
 
-import com.staffgenics.training.banking.client.ClientEntity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,8 +17,7 @@ public class AccountEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  private ClientEntity client;
+  private Long clientId;
 
   private String accountNumber;
 
