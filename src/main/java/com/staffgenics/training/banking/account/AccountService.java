@@ -2,6 +2,8 @@ package com.staffgenics.training.banking.account;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import com.staffgenics.training.banking.account.operation.OperationDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +15,9 @@ public class AccountService {
   private final AccountRepository accountRepository;
   
   @Autowired
-  AccountService(AccountRepository accountRepository){this.accountRepository = accountRepository;}
+  AccountService(AccountRepository accountRepository){
+    this.accountRepository = accountRepository;
+  }
 
   List<AccountDto> getAccounts(){
     log.info("Pobieramy wszystkie konta");
@@ -44,9 +48,25 @@ public class AccountService {
   }
 
   void editAccount(AccountDto accountDto, Long id) {
-    log.info("Edytujemy konto o id: {}", id);
+    log.info("Edytujemy konto o id: {}");
     AccountEntity accountEntity = findAccount(id);
     accountEntity.update(accountDto);
     accountRepository.save(accountEntity);
+  }
+
+  private AccountEntity findAccountByNumber(OperationDto operationDto){
+    AccountEntity destinationAccount = accountRepository.findBy
+    return new AccountEntity();
+  }
+
+  Long addOperation(OperationDto operationDto, Long id){
+    AccountEntity sourceAccount = findAccount(id);
+    if(sourceAccount.getBalance().compareTo(operationDto.getAmount()) < 0){
+      throw new IllegalArgumentException("Brak środków na koncie");
+    }
+    AccountEntity destiantionAccount = (operationDto.getId());
+
+
+    return new Long(0);
   }
 }
