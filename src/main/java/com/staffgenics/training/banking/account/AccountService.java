@@ -1,22 +1,28 @@
 package com.staffgenics.training.banking.account;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.staffgenics.training.banking.account.operation.OperationDto;
+import com.staffgenics.training.banking.account.operation.OperationEntity;
+import com.staffgenics.training.banking.account.operation.OperationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
 public class AccountService {
   
   private final AccountRepository accountRepository;
+  private final OperationRepository operationRepository;
   
   @Autowired
-  AccountService(AccountRepository accountRepository){
+  AccountService(AccountRepository accountRepository, OperationRepository operationRepository){
     this.accountRepository = accountRepository;
+    this.operationRepository = operationRepository;
   }
 
   List<AccountDto> getAccounts(){
@@ -54,19 +60,32 @@ public class AccountService {
     accountRepository.save(accountEntity);
   }
 
-  private AccountEntity findAccountByNumber(OperationDto operationDto){
-    AccountEntity destinationAccount = accountRepository.findBy
-    return new AccountEntity();
+  private Optional<AccountEntity> findAccountByNRB(String accountNumber){
+    Optional<AccountEntity> destinationAccount = accountRepository.findByNRB(accountNumber);
+    return destinationAccount;
   }
 
+  @Transactional
   Long addOperation(OperationDto operationDto, Long id){
     AccountEntity sourceAccount = findAccount(id);
-    if(sourceAccount.getBalance().compareTo(operationDto.getAmount()) < 0){
+    BigDecimal sourceAccountBalance = sourceAccount.getBalance();
+    if(sourceAccountBalance.compareTo(operationDto.getAmount()) < 0){
       throw new IllegalArgumentException("Brak środków na koncie");
     }
-    AccountEntity destiantionAccount = (operationDto.getId());
+    Optional<AccountEntity> destiantionAccount = findAccountByNRB(operationDto.getDestinationAccountNumber());
+    if(!destiantionAccount.isPresent()){
+      throw new IllegalArgumentException("Brak konta w bazie danych");
+    }
+    sourceAccount.subtractBalance(operationDto.getAmount());
+    destiantionAccount.get().addBalance(operationDto.getAmount());
+    OperationEntity operationEntity = OperationEntity.createInstance(operationDto);
+    accountRepository.save(sourceAccount);
+    accountRepository.save(destiantionAccount.get());
+    operationRepository.save(operationEntity);
+    return operationEntity.getId();
+  }
 
-
-    return new Long(0);
+  List<OperationDto> findOperations(SearchOperationDto searchOperationDto, Long id){
+    return operationRepository.fin
   }
 }

@@ -21,3 +21,13 @@ CREATE TABLE account (
   CONSTRAINT uq_account_account_number UNIQUE (account_number)
 );
 COMMENT ON TABLE account IS 'Konta klientów banku';
+
+CREATE TABLE operation (
+  id BIGSERIAL NOT NULL,
+  source_account_id INT8 NOT NULL,
+  destination_account_number VARCHAR(26) NOT NULL,
+  amount NUMERIC(18, 2) NOT NULL,
+  currency VARCHAR(3) NOT NULL,
+  transaction_date DATE NOT NULL,
+  CONSTRAINT pk_operation PRIMARY KEY (id)
+);

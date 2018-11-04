@@ -13,7 +13,7 @@ import java.util.Date;
 public class OperationDto {
 
   private Long id;
-  private Long sourceAccountNumber;
+  private Long sourceAccountId;
   private String destinationAccountNumber;
   private BigDecimal amount;
   private String currency;
@@ -22,7 +22,7 @@ public class OperationDto {
   static OperationDto createInstance(OperationEntity operationEntity) {
     OperationDto operationDto = new OperationDto();
     operationDto.setId(operationEntity.getId());
-    operationDto.setSourceAccountNumber(operationEntity.getSourceAccountNumber());
+    operationDto.setSourceAccountId(operationEntity.getSourceAccountId());
     operationDto.setDestinationAccountNumber(operationEntity.getDestinationAccountNumber());
     operationDto.setAmount(operationEntity.getAmount());
     operationDto.setCurrency(operationEntity.getCurrency());

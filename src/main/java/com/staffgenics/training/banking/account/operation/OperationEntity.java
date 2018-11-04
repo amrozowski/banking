@@ -11,26 +11,26 @@ import java.util.Date;
 @Entity
 @Table(name = "operation")
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
-@Getter(AccessLevel.PACKAGE)
+@Getter(AccessLevel.PUBLIC)
 @Setter(AccessLevel.PRIVATE)
 public class OperationEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-  private Long sourceAccountNumber;
+  private Long sourceAccountId;
   private String destinationAccountNumber;
   private BigDecimal amount;
   private String currency;
   private Date transactionDate;
 
-  static OperationEntity createInstance(OperationDto operationDto) {
+  public static OperationEntity createInstance(OperationDto operationDto) {
     OperationEntity operationEntity = new OperationEntity();
-    operationEntity.setSourceAccountNumber(operationDto.getSourceAccountNumber());
+    operationEntity.setSourceAccountId(operationDto.getSourceAccountId());
     operationEntity.setDestinationAccountNumber(operationDto.getDestinationAccountNumber());
     operationEntity.setAmount(operationDto.getAmount());
     operationEntity.setCurrency(operationDto.getCurrency());
-    operationEntity.setTransactionDate(operationDto.getTransactionDate());
+    operationEntity.setTransactionDate(new Date());
     return operationEntity;
   }
 }

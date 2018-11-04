@@ -38,7 +38,13 @@ public class AccountController {
 
   @RequestMapping(value = "/account/{id}/operation", method = RequestMethod.POST)
   public Long addOperation(@RequestBody OperationDto operationDto, @PathVariable Long id){
+    operationDto.setSourceAccountId(id);
     return accountService.addOperation(operationDto, id);
+  }
+
+  @RequestMapping(value = "/account/{id}/operations", method = RequestMethod.POST)
+  public Long findOperations(@RequestBody SearchOperationDto searchOperationDto, @PathVariable Long id){
+    return accountService.findOperations(searchOperationDto, id);
   }
 
 }

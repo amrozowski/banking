@@ -43,4 +43,14 @@ public class AccountEntity {
     setCurrency(Currency.valueOf(accountDto.getCurrency()));
     setBalance(accountDto.getBalance());
   }
+
+  void subtractBalance(BigDecimal amount){
+    BigDecimal newBalance = balance.subtract(amount);
+    setBalance(newBalance);
+  }
+
+  void addBalance(BigDecimal amount){
+    BigDecimal newBalance = balance.add(amount);
+    setBalance(newBalance);
+  }
 }
