@@ -2,13 +2,14 @@ package com.staffgenics.training.banking.account;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
-import com.staffgenics.training.banking.account.operation.OperationDto;
-import com.staffgenics.training.banking.account.operation.OperationEntity;
-import com.staffgenics.training.banking.account.operation.OperationRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.iban4j.CountryCode;
+import org.iban4j.Iban;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.expression.Operation;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ public class AccountService {
   
   private final AccountRepository accountRepository;
   private final OperationRepository operationRepository;
+  private static final int MAX_GENERATION_TRIES = 1000;
   
   @Autowired
   AccountService(AccountRepository accountRepository, OperationRepository operationRepository){
@@ -31,9 +33,27 @@ public class AccountService {
         .map(AccountDto::createInstance)
         .collect(Collectors.toList());
   }
+  private String generateUniqueNrb() {
+    String accountNumber;
+    int generationTry = 0;
+    do {
+      if (MAX_GENERATION_TRIES < generationTry) {
+        throw new IllegalStateException("Błąd generacji konta, przekroczono maksymalną liczbę prób");
+      }
+      Iban iban = new Iban.Builder()
+          .countryCode(CountryCode.PL)
+          .bankCode("19043")
+          .buildRandom();
+      accountNumber = iban.getAccountNumber();
+      generationTry++;
+    } while (accountRepository.findByNRB(accountNumber).get() != null);
+    return accountNumber;
+  }
 
   Long createAccount(AccountDto accountDto) {
     log.info("Dodajemy nowe konto");
+    String accountNumber = generateUniqueNrb();
+    accountDto.setAccountNumber(accountNumber);
     AccountEntity accountEntity = AccountEntity.createInstance(accountDto);
     accountRepository.save(accountEntity);
     return accountEntity.getId();
@@ -85,7 +105,17 @@ public class AccountService {
     return operationEntity.getId();
   }
 
-  List<OperationDto> findOperations(SearchOperationDto searchOperationDto, Long id){
-    return operationRepository.fin
+  List<OperationDto> findOperationsOut(SearchOperationDto searchOperationDto, Long id){
+    return operationRepository.findOutByAmountAndDate(searchOperationDto.getAmountFrom(), searchOperationDto.getAmountTo(), searchOperationDto.getDateFrom(), searchOperationDto.getDateTo(), id).stream()
+        .map(OperationDto::createInstance)
+        .collect(Collectors.toList());
+  }
+
+  List<OperationDto> findOperationsIncome(SearchOperationDto searchOperationDto, Long id){
+    Optional<AccountEntity> accountEntityOptional = accountRepository.findById(id);
+    String nrb = accountEntityOptional.get().getAccountNumber();
+    return operationRepository.findIncomeByAmountAndDate(searchOperationDto.getAmountFrom(), searchOperationDto.getAmountTo(), searchOperationDto.getDateFrom(), searchOperationDto.getDateTo(), nrb).stream()
+        .map(OperationDto::createInstance)
+        .collect(Collectors.toList());
   }
 }

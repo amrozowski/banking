@@ -2,7 +2,6 @@ package com.staffgenics.training.banking.account;
 
 import java.util.List;
 
-import com.staffgenics.training.banking.account.operation.OperationDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,10 +30,10 @@ public class AccountController {
     return accountService.getAccount(id);
   }
 
-  @RequestMapping(value = "/account/{id}", method = RequestMethod.PUT)
-  public void createAccount(@RequestBody AccountDto accountDto, @PathVariable Long id) {
-    accountService.editAccount(accountDto, id);
-  }
+  //@RequestMapping(value = "/account/{id}", method = RequestMethod.PUT)
+  //public void createAccount(@RequestBody AccountDto accountDto, @PathVariable Long id) {
+  //  accountService.editAccount(accountDto, id);
+  //}
 
   @RequestMapping(value = "/account/{id}/operation", method = RequestMethod.POST)
   public Long addOperation(@RequestBody OperationDto operationDto, @PathVariable Long id){
@@ -43,8 +42,10 @@ public class AccountController {
   }
 
   @RequestMapping(value = "/account/{id}/operations", method = RequestMethod.POST)
-  public Long findOperations(@RequestBody SearchOperationDto searchOperationDto, @PathVariable Long id){
-    return accountService.findOperations(searchOperationDto, id);
+  public List<OperationDto> findOperations(@RequestBody SearchOperationDto searchOperationDto, @PathVariable Long id){
+    List<OperationDto> operations = accountService.findOperationsOut(searchOperationDto, id);
+    operations.addAll(accountService.findOperationsIncome(searchOperationDto, id));
+    return operations;
   }
 
 }

@@ -33,7 +33,7 @@ public class AccountEntity {
     accountEntity.setClientId(accountDto.getClientId());
     accountEntity.setAccountNumber(accountDto.getAccountNumber());
     accountEntity.setCurrency(Currency.valueOf(accountDto.getCurrency()));
-    accountEntity.setBalance(accountDto.getBalance());
+    accountEntity.setBalance(BigDecimal.ZERO);
     return accountEntity;
   }
 

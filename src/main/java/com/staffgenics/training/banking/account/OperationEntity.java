@@ -1,4 +1,4 @@
-package com.staffgenics.training.banking.account.operation;
+package com.staffgenics.training.banking.account;
 
 import javax.persistence.*;
 
