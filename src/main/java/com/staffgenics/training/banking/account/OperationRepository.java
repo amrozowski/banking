@@ -13,7 +13,7 @@ public interface OperationRepository extends JpaRepository<OperationEntity, Long
 
   @Query("SELECT operation FROM OperationEntity operation " +
       "WHERE operation.sourceAccountId = :id " +
-      "WHERE operation.amount >= :amountFrom " +
+      "AND operation.amount >= :amountFrom " +
       "AND operation.amount <= :amountTo " +
       "AND operation.transactionDate >= :dateFrom " +
       "AND operation.transactionDate <= :dateTo")

@@ -30,11 +30,6 @@ public class AccountController {
     return accountService.getAccount(id);
   }
 
-  //@RequestMapping(value = "/account/{id}", method = RequestMethod.PUT)
-  //public void createAccount(@RequestBody AccountDto accountDto, @PathVariable Long id) {
-  //  accountService.editAccount(accountDto, id);
-  //}
-
   @RequestMapping(value = "/account/{id}/operation", method = RequestMethod.POST)
   public Long addOperation(@RequestBody OperationDto operationDto, @PathVariable Long id){
     operationDto.setSourceAccountId(id);
@@ -46,6 +41,16 @@ public class AccountController {
     List<OperationDto> operations = accountService.findOperationsOut(searchOperationDto, id);
     operations.addAll(accountService.findOperationsIncome(searchOperationDto, id));
     return operations;
+  }
+
+  @RequestMapping(value = "/account/{id}/operations/outcome", method = RequestMethod.POST)
+  public List<OperationDto> findOperationsOutcome(@RequestBody SearchOperationDto searchOperationDto, @PathVariable Long id){
+    return accountService.findOperationsOut(searchOperationDto, id);
+  }
+
+  @RequestMapping(value = "/account/{id}/operations/income", method = RequestMethod.POST)
+  public List<OperationDto> findOperationsIncome(@RequestBody SearchOperationDto searchOperationDto, @PathVariable Long id){
+    return accountService.findOperationsIncome(searchOperationDto, id);
   }
 
 }

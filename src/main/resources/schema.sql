@@ -22,6 +22,17 @@ CREATE TABLE account (
 );
 COMMENT ON TABLE account IS 'Konta klientów banku';
 
+CREATE TABLE currency (
+  code VARCHAR(3) NOT NULL,
+  label VARCHAR(50) NOT NULL,
+  exchange_rate NUMERIC(18, 2) NOT NULL,
+  CONSTRAINT pk_currency PRIMARY KEY (code)
+);
+COMMENT ON TABLE currency IS 'Waluty kont bankowych';
+
+ALTER TABLE account RENAME COLUMN currency TO currency_code;
+ALTER TABLE account ADD CONSTRAINT fk_account_currency FOREIGN KEY (currency_code) REFERENCES currency(code);
+
 CREATE TABLE operation (
   id BIGSERIAL NOT NULL,
   source_account_id INT8 NOT NULL,
@@ -31,3 +42,6 @@ CREATE TABLE operation (
   transaction_date DATE NOT NULL,
   CONSTRAINT pk_operation PRIMARY KEY (id)
 );
+
+ALTER TABLE client ADD COLUMN version INT8 DEFAULT 0;
+ALTER TABLE account ADD COLUMN version INT8 DEFAULT 0;

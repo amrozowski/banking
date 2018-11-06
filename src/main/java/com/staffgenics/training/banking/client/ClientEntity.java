@@ -31,6 +31,9 @@ public class ClientEntity {
 
   private boolean vip;
 
+  @Version
+  private Long version;
+
   static ClientEntity createInstance(ClientDto clientDto) {
     ClientEntity clientEntity = new ClientEntity();
     clientEntity.setSurname(clientDto.getSurname());
@@ -42,6 +45,7 @@ public class ClientEntity {
   }
 
   void update(ClientDto clientDto) {
+    setVersion(clientDto.getVersion());
     setSurname(clientDto.getSurname());
     setName(clientDto.getName());
     setPesel(clientDto.getPesel());

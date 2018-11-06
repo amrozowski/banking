@@ -2,14 +2,12 @@ package com.staffgenics.training.banking.account;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.iban4j.CountryCode;
 import org.iban4j.Iban;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.expression.Operation;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,12 +17,14 @@ public class AccountService {
   
   private final AccountRepository accountRepository;
   private final OperationRepository operationRepository;
+  private final CurrencyRepository currencyRepository;
   private static final int MAX_GENERATION_TRIES = 1000;
   
   @Autowired
-  AccountService(AccountRepository accountRepository, OperationRepository operationRepository){
+  AccountService(AccountRepository accountRepository, OperationRepository operationRepository, CurrencyRepository currencyRepository){
     this.accountRepository = accountRepository;
     this.operationRepository = operationRepository;
+    this.currencyRepository = currencyRepository;
   }
 
   List<AccountDto> getAccounts(){
@@ -54,7 +54,8 @@ public class AccountService {
     log.info("Dodajemy nowe konto");
     String accountNumber = generateUniqueNrb();
     accountDto.setAccountNumber(accountNumber);
-    AccountEntity accountEntity = AccountEntity.createInstance(accountDto);
+    CurrencyEntity currencyEntity = currencyRepository.getOne(accountDto.getCurrency());
+    AccountEntity accountEntity = AccountEntity.createInstance(accountDto, currencyEntity);
     accountRepository.save(accountEntity);
     return accountEntity.getId();
   }
@@ -71,13 +72,6 @@ public class AccountService {
       throw new IllegalArgumentException("Brak konta w bazie danych");
     }
     return accountEntityOptional.get();
-  }
-
-  void editAccount(AccountDto accountDto, Long id) {
-    log.info("Edytujemy konto o id: {}");
-    AccountEntity accountEntity = findAccount(id);
-    accountEntity.update(accountDto);
-    accountRepository.save(accountEntity);
   }
 
   private Optional<AccountEntity> findAccountByNRB(String accountNumber){

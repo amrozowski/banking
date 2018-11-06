@@ -23,25 +23,22 @@ public class AccountEntity {
 
   private String accountNumber;
 
-  @Enumerated(EnumType.STRING)
-  private Currency currency;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  private CurrencyEntity currency;
 
   private BigDecimal balance;
 
-  static AccountEntity createInstance(AccountDto accountDto) {
+  @Version
+  private Long version;
+
+  static AccountEntity createInstance(AccountDto accountDto, CurrencyEntity currencyEntity) {
     AccountEntity accountEntity = new AccountEntity();
     accountEntity.setClientId(accountDto.getClientId());
     accountEntity.setAccountNumber(accountDto.getAccountNumber());
-    accountEntity.setCurrency(Currency.valueOf(accountDto.getCurrency()));
+    accountEntity.setCurrency(currencyEntity);
     accountEntity.setBalance(BigDecimal.ZERO);
+    accountEntity.setVersion(accountDto.getVersion());
     return accountEntity;
-  }
-
-  void update(AccountDto accountDto) {
-    setClientId(accountDto.getClientId());
-    setAccountNumber(accountDto.getAccountNumber());
-    setCurrency(Currency.valueOf(accountDto.getCurrency()));
-    setBalance(accountDto.getBalance());
   }
 
   void subtractBalance(BigDecimal amount){
@@ -52,5 +49,9 @@ public class AccountEntity {
   void addBalance(BigDecimal amount){
     BigDecimal newBalance = balance.add(amount);
     setBalance(newBalance);
+  }
+
+  BigDecimal getBalanceInPLN() {
+    return balance.multiply(currency.getExchangeRate());
   }
 }

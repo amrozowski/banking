@@ -21,6 +21,10 @@ public class AccountDto {
 
   private BigDecimal balance;
 
+  private BigDecimal balanceInPLN;
+
+  private Long version;
+
   static AccountDto createInstance(AccountEntity accountEntity) {
     AccountDto accountDto = new AccountDto();
     accountDto.setId(accountEntity.getId());
@@ -28,6 +32,8 @@ public class AccountDto {
     accountDto.setAccountNumber(accountEntity.getAccountNumber());
     accountDto.setCurrency(accountEntity.getCurrency().toString());
     accountDto.setBalance(accountEntity.getBalance());
+    accountDto.setBalanceInPLN(accountEntity.getBalanceInPLN());
+    accountDto.setVersion(accountEntity.getVersion());
     return accountDto;
   }
 }

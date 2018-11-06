@@ -24,6 +24,8 @@ public class ClientDto {
 
   private boolean vip;
 
+  private Long version;
+
   static ClientDto createInstance(ClientEntity clientEntity) {
     ClientDto clientDto = new ClientDto();
     clientDto.setId(clientEntity.getId());

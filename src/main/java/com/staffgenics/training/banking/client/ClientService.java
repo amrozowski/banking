@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.OptimisticLockException;
+
 /**
  * Serwis obsługujący klientów.
  */
@@ -53,6 +55,9 @@ class ClientService {
   void editClient(ClientDto clientDto, Long id) {
     log.info("Edytujemy klienta o id: {}", id);
     ClientEntity clientEntity = findClient(id);
+    if (!clientEntity.getVersion().equals(clientDto.getVersion())) {
+      throw new OptimisticLockException("Błąd edycji, odśwież dane.");
+    }
     clientEntity.update(clientDto);
     clientRepository.save(clientEntity);
   }
