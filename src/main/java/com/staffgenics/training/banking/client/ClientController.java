@@ -33,6 +33,11 @@ public class ClientController {
     return clientService.getClient(id);
   }
 
+  @RequestMapping(value = "/clients", method = RequestMethod.POST)
+  public List<ClientDto> getClientByCriteria(@RequestBody SearchClientDto searchClientDto) {
+    return clientService.getClientByCriteria(searchClientDto);
+  }
+
   @RequestMapping(value = "/client/{id}", method = RequestMethod.PUT)
   public void createClient(@RequestBody ClientDto clientDto, @PathVariable Long id) {
     clientService.editClient(clientDto, id);

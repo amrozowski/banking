@@ -24,6 +24,8 @@ public class ClientDto {
 
   private boolean vip;
 
+  private boolean foreigner;
+
   private Long version;
 
   static ClientDto createInstance(ClientEntity clientEntity) {
@@ -34,6 +36,7 @@ public class ClientDto {
     clientDto.setPesel(clientEntity.getPesel());
     clientDto.setSecondName(clientEntity.getSecondName());
     clientDto.setVip(clientEntity.isVip());
+    clientDto.setForeigner(clientEntity.isForeigner());
     return clientDto;
   }
 }

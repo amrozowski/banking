@@ -9,6 +9,7 @@ COMMENT ON TABLE client IS 'Klienci banku';
 
 ALTER TABLE client ADD second_name VARCHAR(20);
 ALTER TABLE client ADD vip BOOLEAN NOT NULL;
+ALTER TABLE client ADD foreigner BOOLEAN NOT NULL;
 
 CREATE TABLE account (
   id BIGSERIAL NOT NULL,

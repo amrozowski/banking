@@ -42,11 +42,11 @@ public class AccountService {
       }
       Iban iban = new Iban.Builder()
           .countryCode(CountryCode.PL)
-          .bankCode("19043")
+          .bankCode("190")
           .buildRandom();
-      accountNumber = iban.getAccountNumber();
+      accountNumber = iban.getBban();
       generationTry++;
-    } while (accountRepository.findByNRB(accountNumber).get() != null);
+    } while (accountRepository.findByNRB(accountNumber).isPresent());
     return accountNumber;
   }
 

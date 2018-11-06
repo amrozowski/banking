@@ -31,6 +31,8 @@ public class ClientEntity {
 
   private boolean vip;
 
+  private boolean foreigner;
+
   @Version
   private Long version;
 
@@ -41,6 +43,7 @@ public class ClientEntity {
     clientEntity.setPesel(clientDto.getPesel());
     clientEntity.setSecondName(clientDto.getSecondName());
     clientEntity.setVip(clientDto.isVip());
+    clientEntity.setForeigner(clientDto.isForeigner());
     return clientEntity;
   }
 
@@ -51,5 +54,6 @@ public class ClientEntity {
     setPesel(clientDto.getPesel());
     setSecondName(clientDto.getSecondName());
     setVip(clientDto.isVip());
+    setForeigner(clientDto.isForeigner());
   }
 }
