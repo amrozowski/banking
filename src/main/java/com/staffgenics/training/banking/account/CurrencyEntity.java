@@ -3,6 +3,7 @@ package com.staffgenics.training.banking.account;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -16,6 +17,7 @@ import java.math.BigDecimal;
 @Table(name = "currency")
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter(AccessLevel.PACKAGE)
+@Setter(AccessLevel.PACKAGE)
 class CurrencyEntity {
 
   @Id

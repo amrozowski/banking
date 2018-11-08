@@ -3,13 +3,11 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
-import org.iban4j.CountryCode;
-import org.iban4j.Iban;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import javax.persistence.OptimisticLockException;
 
 @Service
 @Slf4j
@@ -18,13 +16,16 @@ public class AccountService {
   private final AccountRepository accountRepository;
   private final OperationRepository operationRepository;
   private final CurrencyRepository currencyRepository;
-  private static final int MAX_GENERATION_TRIES = 1000;
+  private NrbService nrbService;
+  private OperationService operationService;
   
   @Autowired
-  AccountService(AccountRepository accountRepository, OperationRepository operationRepository, CurrencyRepository currencyRepository){
+  AccountService(AccountRepository accountRepository, OperationRepository operationRepository, CurrencyRepository currencyRepository, NrbService nrbService, OperationService operationService){
     this.accountRepository = accountRepository;
     this.operationRepository = operationRepository;
     this.currencyRepository = currencyRepository;
+    this.nrbService = nrbService;
+    this.operationService = operationService;
   }
 
   List<AccountDto> getAccounts(){
@@ -33,26 +34,10 @@ public class AccountService {
         .map(AccountDto::createInstance)
         .collect(Collectors.toList());
   }
-  private String generateUniqueNrb() {
-    String accountNumber;
-    int generationTry = 0;
-    do {
-      if (MAX_GENERATION_TRIES < generationTry) {
-        throw new IllegalStateException("Błąd generacji konta, przekroczono maksymalną liczbę prób");
-      }
-      Iban iban = new Iban.Builder()
-          .countryCode(CountryCode.PL)
-          .bankCode("190")
-          .buildRandom();
-      accountNumber = iban.getBban();
-      generationTry++;
-    } while (accountRepository.findByNRB(accountNumber).isPresent());
-    return accountNumber;
-  }
 
   Long createAccount(AccountDto accountDto) {
     log.info("Dodajemy nowe konto");
-    String accountNumber = generateUniqueNrb();
+    String accountNumber = nrbService.generateUniqueNrb();
     accountDto.setAccountNumber(accountNumber);
     CurrencyEntity currencyEntity = currencyRepository.getOne(accountDto.getCurrency());
     AccountEntity accountEntity = AccountEntity.createInstance(accountDto, currencyEntity);
@@ -62,41 +47,54 @@ public class AccountService {
 
   AccountDto getAccount(Long id) {
     log.info("Pobieramy konto o id: {}", id);
-    AccountEntity accountEntity = findAccount(id);
+    AccountEntity accountEntity = accountRepository.findById(id).get();
     return AccountDto.createInstance(accountEntity);
   }
 
-  private AccountEntity findAccount(Long id) {
-    Optional<AccountEntity> accountEntityOptional = accountRepository.findById(id);
-    if (!accountEntityOptional.isPresent()) {
-      throw new IllegalArgumentException("Brak konta w bazie danych");
-    }
-    return accountEntityOptional.get();
-  }
-
-  private Optional<AccountEntity> findAccountByNRB(String accountNumber){
-    Optional<AccountEntity> destinationAccount = accountRepository.findByNRB(accountNumber);
-    return destinationAccount;
-  }
-
   @Transactional
-  Long addOperation(OperationDto operationDto, Long id){
-    AccountEntity sourceAccount = findAccount(id);
+  Long referOperation(OperationDto operationDto, Long id){
+    OperationEntity operationEntity = OperationEntity.createInstance(operationDto);
+    AccountEntity sourceAccount = verifySourceAccountBalance(id, operationEntity);
+    AccountEntity destinationAccount = verifyDestinationAccountExist(operationEntity);
+    updateAccounts(sourceAccount, destinationAccount, operationEntity.getAmount());
+    operationService.addOperation(operationEntity);
+    return operationEntity.getId();
+  }
+
+  private AccountEntity verifySourceAccountBalance(Long id, OperationEntity operationEntity){
+    Optional<AccountEntity> sourceAccountOptional = accountRepository.findById(id);
+    if (!sourceAccountOptional.isPresent()) {
+      throw new IllegalArgumentException("Brak konta źródłowego w bazie danych");
+    }
+    AccountEntity sourceAccount = sourceAccountOptional.get();
     BigDecimal sourceAccountBalance = sourceAccount.getBalance();
-    if(sourceAccountBalance.compareTo(operationDto.getAmount()) < 0){
+    if(sourceAccountBalance.compareTo(operationEntity.getAmount()) < 0){
       throw new IllegalArgumentException("Brak środków na koncie");
     }
-    Optional<AccountEntity> destiantionAccount = findAccountByNRB(operationDto.getDestinationAccountNumber());
+    return sourceAccount;
+  }
+
+  private AccountEntity verifyDestinationAccountExist(OperationEntity operationEntity){
+    Optional<AccountEntity> destiantionAccount = accountRepository.findByNRB(operationEntity.getDestinationAccountNumber());
     if(!destiantionAccount.isPresent()){
-      throw new IllegalArgumentException("Brak konta w bazie danych");
+      throw new IllegalArgumentException("Brak konta docelowego w bazie danych");
     }
-    sourceAccount.subtractBalance(operationDto.getAmount());
-    destiantionAccount.get().addBalance(operationDto.getAmount());
-    OperationEntity operationEntity = OperationEntity.createInstance(operationDto);
+    return destiantionAccount.get();
+  }
+
+  private void updateAccounts(AccountEntity sourceAccount, AccountEntity destinationAccount, BigDecimal amount){
+    sourceAccount.subtractBalance(amount);
+    destinationAccount.addBalance(amount);
+    AccountEntity accountEntity = accountRepository.findById(sourceAccount.getId()).get();
+    if (!sourceAccount.getVersion().equals(accountEntity.getVersion())) {
+      throw new OptimisticLockException("Błąd edycji, odśwież dane.");
+    }
     accountRepository.save(sourceAccount);
-    accountRepository.save(destiantionAccount.get());
-    operationRepository.save(operationEntity);
-    return operationEntity.getId();
+    accountEntity = accountRepository.findById(destinationAccount.getId()).get();
+    if (!destinationAccount.getVersion().equals(accountEntity.getVersion())) {
+      throw new OptimisticLockException("Błąd edycji, odśwież dane.");
+    }
+    accountRepository.save(destinationAccount);
   }
 
   List<OperationDto> findOperationsOut(SearchOperationDto searchOperationDto, Long id){

@@ -2,6 +2,7 @@ package com.staffgenics.training.banking.client;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,14 +21,5 @@ interface ClientRepository extends JpaRepository<ClientEntity, Long> {
       "WHERE client.name = :name " +
       "AND client.surname = :surname " +
       "AND client.secondName = :secondName")
-  List<ClientEntity> findClientByCriteria(String name, String surname, String secondName);
-
-  @Query("SELECT client FROM ClientEntity client " +
-      "WHERE client.name = :name " +
-      "AND client.surname = :surname ")
-  List<ClientEntity> findClientByCriteria(String name, String surname);
-
-  @Query("SELECT client FROM ClientEntity client WHERE client.surname = :surname")
-  List<ClientEntity> findClientByCriteria(String surname);
-
+  List<ClientEntity> findClientByCriteria(@Param("name")String name, @Param("surname")String surname, @Param("secondName")String secondName);
 }

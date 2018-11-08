@@ -31,9 +31,9 @@ public class AccountController {
   }
 
   @RequestMapping(value = "/account/{id}/operation", method = RequestMethod.POST)
-  public Long addOperation(@RequestBody OperationDto operationDto, @PathVariable Long id){
+  public Long referOperation(@RequestBody OperationDto operationDto, @PathVariable Long id){
     operationDto.setSourceAccountId(id);
-    return accountService.addOperation(operationDto, id);
+    return accountService.referOperation(operationDto, id);
   }
 
   @RequestMapping(value = "/account/{id}/operations", method = RequestMethod.POST)
@@ -52,5 +52,4 @@ public class AccountController {
   public List<OperationDto> findOperationsIncome(@RequestBody SearchOperationDto searchOperationDto, @PathVariable Long id){
     return accountService.findOperationsIncome(searchOperationDto, id);
   }
-
 }

@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
+
 /**
  * DTO z danymi klienta.
  */
@@ -26,6 +28,8 @@ public class ClientDto {
 
   private boolean foreigner;
 
+  private Date birthDate;
+
   private Long version;
 
   static ClientDto createInstance(ClientEntity clientEntity) {
@@ -37,6 +41,7 @@ public class ClientDto {
     clientDto.setSecondName(clientEntity.getSecondName());
     clientDto.setVip(clientEntity.isVip());
     clientDto.setForeigner(clientEntity.isForeigner());
+    clientDto.setBirthDate(clientEntity.getBirthDate());
     return clientDto;
   }
 }

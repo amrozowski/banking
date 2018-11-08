@@ -19,9 +19,13 @@ class ClientService {
 
   private final ClientRepository clientRepository;
 
+  private PeselService peselService;
+
   @Autowired
-  ClientService(ClientRepository clientRepository) {
+  ClientService(ClientRepository clientRepository, PeselService peselService) {
+
     this.clientRepository = clientRepository;
+    this.peselService = peselService;
   }
 
   List<ClientDto> getClients() {
@@ -45,64 +49,35 @@ class ClientService {
     return clientEntityOptional.get();
   }
 
-  private boolean validatePesel(ClientDto clientDto){
-    String pesel = clientDto.getPesel();
-    //length
-    if (pesel.length() != 11) {
-      log.info("Budowa numeru PESEL nie jest poprawna.");
-      return false;
-    }
-    //allDigits and checksum
-    boolean allDigits = true;
-    int checkSum = 0;
-    int[] weights = {1,3,7,9,1,3,7,9,1,3};
-
-    for (int i = 0; i < pesel.length(); i++) {
-      //all digits
-      if (Character.isDigit(pesel.charAt(i))){
-        allDigits = true;
-      } else {
-        log.info("Budowa numeru PESEL nie jest poprawna.");
-        return false;
-      }
-      //checksum
-      if (i!=10) checkSum += (weights[i] * Character.getNumericValue(pesel.charAt(i))) % 10;
-    }
-    checkSum = 10 - (checkSum % 10);
-    boolean isCheckSumValid = checkSum == Character.getNumericValue(pesel.charAt(pesel.length() - 1));
-    if (!isCheckSumValid){
-      log.info("Budowa numeru PESEL nie jest poprawna.");
-      return false;
-    }
-    log.info("Budowa numeru PESEL jest poprawna.");
-    return true;
+  Long createClient(ClientDto clientDto) {
+    log.info("Dodajemy nowego klienta");
+    ClientEntity clientEntity = ClientEntity.createInstance(clientDto);
+    validateClient(clientEntity);
+    clientRepository.save(clientEntity);
+    return clientEntity.getId();
   }
 
-  private void verifyPersonalData(ClientDto clientDto) {
-    Optional<ClientEntity> clientEntityOptional = clientRepository.findClientByPesel(clientDto.getPesel());
+  void validateClient(ClientEntity clientEntity){
+    if(!clientEntity.isForeigner()){
+      peselService.validatePesel(clientEntity.getPesel());
+    }
+    else{
+      clientEntity.setPesel(peselService.generatePeselForForeigner(clientEntity.getBirthDate(),clientEntity.getName(),clientEntity.getSurname()));
+    }
+    verifyPersonalData(clientEntity);
+  }
+
+  void verifyPersonalData(ClientEntity clientEntity) {
+    Optional<ClientEntity> clientEntityOptional = clientRepository.findClientByPesel(clientEntity.getPesel());
     if(clientEntityOptional.isPresent()) {
-      ClientEntity clientEntity = clientEntityOptional.get();
-      if (clientDto.getName().equals(clientEntity.getName()) && clientDto.getSecondName().equals(clientEntity.getSecondName()) &&
-          clientDto.getSurname().equals(clientEntity.getSurname())) {
+      ClientEntity clientEntityDB = clientEntityOptional.get();
+      if (clientEntity.getName().equals(clientEntityDB.getName()) && clientEntity.getSecondName().equals(clientEntityDB.getSecondName()) &&
+          clientEntity.getSurname().equals(clientEntityDB.getSurname())) {
         throw new IllegalArgumentException("Klient o podanym numerze PESEL istnieje - dane osobowe zgodne");
-      } else if (clientEntity.getPesel().equals(clientDto.getPesel())) {
+      } else{
         throw new IllegalArgumentException("Klient o podanym numerze PESEL istnieje - dane osobowe niezgodne");
       }
     }
-  }
-  Long createClient(ClientDto clientDto) {
-    log.info("Dodajemy nowego klienta");
-    if(!clientDto.isForeigner()){
-      if(!validatePesel(clientDto)){
-        throw new IllegalArgumentException("Nieprawidłowy numer PESEL");
-      }
-      verifyPersonalData(clientDto);
-    } else {
-      clientDto.setPesel("FOREIGNER");
-    }
-    ClientEntity clientEntity = ClientEntity.createInstance(clientDto);
-    clientRepository.save(clientEntity);
-    return clientEntity.getId();
   }
 
   void editClient(ClientDto clientDto, Long id) {
@@ -116,19 +91,8 @@ class ClientService {
   }
 
   List<ClientDto> getClientByCriteria(SearchClientDto searchClientDto){
-    if(searchClientDto.getName() != null && searchClientDto.getSurname() != null && searchClientDto.getSecondName() != null){
-      return clientRepository.findClientByCriteria(searchClientDto.getName(), searchClientDto.getSurname(), searchClientDto.getSecondName()).stream()
+    return clientRepository.findClientByCriteria(searchClientDto.getName(), searchClientDto.getSurname(), searchClientDto.getSecondName()).stream()
           .map(ClientDto::createInstance)
           .collect(Collectors.toList());
-    } else if(searchClientDto.getName() != null && searchClientDto.getSurname() != null){
-      return clientRepository.findClientByCriteria(searchClientDto.getName(), searchClientDto.getSurname()).stream()
-          .map(ClientDto::createInstance)
-          .collect(Collectors.toList());
-    } else if(searchClientDto.getSurname() != null){
-      return clientRepository.findClientByCriteria(searchClientDto.getSurname()).stream()
-          .map(ClientDto::createInstance)
-          .collect(Collectors.toList());
-    }
-    return null;
   }
 }

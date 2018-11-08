@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @Table(name = "account")
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter(AccessLevel.PACKAGE)
-@Setter(AccessLevel.PRIVATE)
+@Setter(AccessLevel.PACKAGE)
 public class AccountEntity {
 
   @Id

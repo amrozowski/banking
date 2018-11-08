@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
+
 /**
  * Encja z danymi klienta.
  */
@@ -14,7 +16,7 @@ import lombok.Setter;
 @Table(name = "client")
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter(AccessLevel.PACKAGE)
-@Setter(AccessLevel.PRIVATE)
+@Setter(AccessLevel.PACKAGE)
 public class ClientEntity {
 
   @Id
@@ -33,6 +35,8 @@ public class ClientEntity {
 
   private boolean foreigner;
 
+  private Date birthDate;
+
   @Version
   private Long version;
 
@@ -44,6 +48,7 @@ public class ClientEntity {
     clientEntity.setSecondName(clientDto.getSecondName());
     clientEntity.setVip(clientDto.isVip());
     clientEntity.setForeigner(clientDto.isForeigner());
+    clientEntity.setBirthDate(clientDto.getBirthDate());
     return clientEntity;
   }
 
@@ -55,5 +60,6 @@ public class ClientEntity {
     setSecondName(clientDto.getSecondName());
     setVip(clientDto.isVip());
     setForeigner(clientDto.isForeigner());
+    setBirthDate(clientDto.getBirthDate());
   }
 }

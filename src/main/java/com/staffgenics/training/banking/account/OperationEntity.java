@@ -12,7 +12,7 @@ import java.util.Date;
 @Table(name = "operation")
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter(AccessLevel.PUBLIC)
-@Setter(AccessLevel.PRIVATE)
+@Setter(AccessLevel.PACKAGE)
 public class OperationEntity {
 
   @Id
