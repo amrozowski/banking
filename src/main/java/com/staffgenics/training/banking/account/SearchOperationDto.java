@@ -13,4 +13,5 @@ public class SearchOperationDto {
   private BigDecimal amountTo;
   private Date dateFrom;
   private Date dateTo;
+  private String operationType;
 }

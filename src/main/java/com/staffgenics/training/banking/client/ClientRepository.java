@@ -18,8 +18,9 @@ interface ClientRepository extends JpaRepository<ClientEntity, Long> {
   Optional<ClientEntity> findClientByPesel(String pesel);
 
   @Query("SELECT client FROM ClientEntity client " +
-      "WHERE client.name = :name " +
-      "AND client.surname = :surname " +
-      "AND client.secondName = :secondName")
-  List<ClientEntity> findClientByCriteria(@Param("name")String name, @Param("surname")String surname, @Param("secondName")String secondName);
+      "WHERE client.surname = :surname " +
+      "AND (client.name = :name OR :name = NULL OR :name = '') " +
+      "AND (client.secondName = :secondName OR :secondName = NULL OR :secondName = '')")
+  //Zapytac o @Param
+  List<ClientEntity> findClientByCriteria(String name, String surname, String secondName);
 }

@@ -42,6 +42,9 @@ public class AccountEntity {
   }
 
   void subtractBalance(BigDecimal amount){
+    if(balance.compareTo(amount) < 0){
+      throw new IllegalArgumentException("Brak środków na koncie");
+    }
     BigDecimal newBalance = balance.subtract(amount);
     setBalance(newBalance);
   }

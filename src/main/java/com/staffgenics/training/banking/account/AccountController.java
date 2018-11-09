@@ -32,24 +32,11 @@ public class AccountController {
 
   @RequestMapping(value = "/account/{id}/operation", method = RequestMethod.POST)
   public Long referOperation(@RequestBody OperationDto operationDto, @PathVariable Long id){
-    operationDto.setSourceAccountId(id);
     return accountService.referOperation(operationDto, id);
   }
 
   @RequestMapping(value = "/account/{id}/operations", method = RequestMethod.POST)
   public List<OperationDto> findOperations(@RequestBody SearchOperationDto searchOperationDto, @PathVariable Long id){
-    List<OperationDto> operations = accountService.findOperationsOut(searchOperationDto, id);
-    operations.addAll(accountService.findOperationsIncome(searchOperationDto, id));
-    return operations;
-  }
-
-  @RequestMapping(value = "/account/{id}/operations/outcome", method = RequestMethod.POST)
-  public List<OperationDto> findOperationsOutcome(@RequestBody SearchOperationDto searchOperationDto, @PathVariable Long id){
-    return accountService.findOperationsOut(searchOperationDto, id);
-  }
-
-  @RequestMapping(value = "/account/{id}/operations/income", method = RequestMethod.POST)
-  public List<OperationDto> findOperationsIncome(@RequestBody SearchOperationDto searchOperationDto, @PathVariable Long id){
-    return accountService.findOperationsIncome(searchOperationDto, id);
+    return accountService.findOperations(searchOperationDto, id);
   }
 }

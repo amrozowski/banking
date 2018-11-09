@@ -37,10 +37,9 @@ public class AccountService {
 
   Long createAccount(AccountDto accountDto) {
     log.info("Dodajemy nowe konto");
-    String accountNumber = nrbService.generateUniqueNrb();
-    accountDto.setAccountNumber(accountNumber);
     CurrencyEntity currencyEntity = currencyRepository.getOne(accountDto.getCurrency());
     AccountEntity accountEntity = AccountEntity.createInstance(accountDto, currencyEntity);
+    accountEntity.setAccountNumber(nrbService.generateUniqueNrb());
     accountRepository.save(accountEntity);
     return accountEntity.getId();
   }
@@ -54,32 +53,28 @@ public class AccountService {
   @Transactional
   Long referOperation(OperationDto operationDto, Long id){
     OperationEntity operationEntity = OperationEntity.createInstance(operationDto);
-    AccountEntity sourceAccount = verifySourceAccountBalance(id, operationEntity);
-    AccountEntity destinationAccount = verifyDestinationAccountExist(operationEntity);
+    operationEntity.setSourceAccountId(id);
+    AccountEntity sourceAccount = verifyAccountExists(id);
+    AccountEntity destinationAccount = verifyAccountExist(operationEntity.getDestinationAccountNumber());
     updateAccounts(sourceAccount, destinationAccount, operationEntity.getAmount());
     operationService.addOperation(operationEntity);
     return operationEntity.getId();
   }
 
-  private AccountEntity verifySourceAccountBalance(Long id, OperationEntity operationEntity){
-    Optional<AccountEntity> sourceAccountOptional = accountRepository.findById(id);
-    if (!sourceAccountOptional.isPresent()) {
-      throw new IllegalArgumentException("Brak konta źródłowego w bazie danych");
+  private AccountEntity verifyAccountExists(Long id){
+    Optional<AccountEntity> accountEnitityOptional = accountRepository.findById(id);
+    if (!accountEnitityOptional.isPresent()) {
+      throw new IllegalArgumentException("Brak konta w bazie danych");
     }
-    AccountEntity sourceAccount = sourceAccountOptional.get();
-    BigDecimal sourceAccountBalance = sourceAccount.getBalance();
-    if(sourceAccountBalance.compareTo(operationEntity.getAmount()) < 0){
-      throw new IllegalArgumentException("Brak środków na koncie");
-    }
-    return sourceAccount;
+    return accountEnitityOptional.get();
   }
 
-  private AccountEntity verifyDestinationAccountExist(OperationEntity operationEntity){
-    Optional<AccountEntity> destiantionAccount = accountRepository.findByNRB(operationEntity.getDestinationAccountNumber());
-    if(!destiantionAccount.isPresent()){
-      throw new IllegalArgumentException("Brak konta docelowego w bazie danych");
+  private AccountEntity verifyAccountExist(String accountNumber){
+    Optional<AccountEntity> accountEnitityOptional = accountRepository.findByNRB(accountNumber);
+    if(!accountEnitityOptional.isPresent()){
+      throw new IllegalArgumentException("Brak konta w bazie danych");
     }
-    return destiantionAccount.get();
+    return accountEnitityOptional.get();
   }
 
   private void updateAccounts(AccountEntity sourceAccount, AccountEntity destinationAccount, BigDecimal amount){
@@ -97,17 +92,25 @@ public class AccountService {
     accountRepository.save(destinationAccount);
   }
 
-  List<OperationDto> findOperationsOut(SearchOperationDto searchOperationDto, Long id){
-    return operationRepository.findOutByAmountAndDate(searchOperationDto.getAmountFrom(), searchOperationDto.getAmountTo(), searchOperationDto.getDateFrom(), searchOperationDto.getDateTo(), id).stream()
-        .map(OperationDto::createInstance)
-        .collect(Collectors.toList());
-  }
-
-  List<OperationDto> findOperationsIncome(SearchOperationDto searchOperationDto, Long id){
-    Optional<AccountEntity> accountEntityOptional = accountRepository.findById(id);
-    String nrb = accountEntityOptional.get().getAccountNumber();
-    return operationRepository.findIncomeByAmountAndDate(searchOperationDto.getAmountFrom(), searchOperationDto.getAmountTo(), searchOperationDto.getDateFrom(), searchOperationDto.getDateTo(), nrb).stream()
-        .map(OperationDto::createInstance)
-        .collect(Collectors.toList());
+  List<OperationDto> findOperations(SearchOperationDto searchOperationDto, Long id){
+    List<OperationDto> operationList;
+    String nrb = accountRepository.findById(id).get().getAccountNumber();
+    if("IN".equals(searchOperationDto.getOperationType())){
+      operationList = operationRepository.findIncomeByAmountAndDate(searchOperationDto.getAmountFrom(), searchOperationDto.getAmountTo(), searchOperationDto.getDateFrom(), searchOperationDto.getDateTo(), nrb).stream()
+          .map(OperationDto::createInstance)
+          .collect(Collectors.toList());
+    } else if("OUT".equals(searchOperationDto.getOperationType())){
+      operationList = operationRepository.findOutByAmountAndDate(searchOperationDto.getAmountFrom(), searchOperationDto.getAmountTo(), searchOperationDto.getDateFrom(), searchOperationDto.getDateTo(), id).stream()
+          .map(OperationDto::createInstance)
+          .collect(Collectors.toList());
+    } else {
+      operationList = operationRepository.findIncomeByAmountAndDate(searchOperationDto.getAmountFrom(), searchOperationDto.getAmountTo(), searchOperationDto.getDateFrom(), searchOperationDto.getDateTo(), nrb).stream()
+          .map(OperationDto::createInstance)
+          .collect(Collectors.toList());
+      operationList.addAll(operationRepository.findOutByAmountAndDate(searchOperationDto.getAmountFrom(), searchOperationDto.getAmountTo(), searchOperationDto.getDateFrom(), searchOperationDto.getDateTo(), id).stream()
+          .map(OperationDto::createInstance)
+          .collect(Collectors.toList()));
+    }
+    return operationList;
   }
 }
