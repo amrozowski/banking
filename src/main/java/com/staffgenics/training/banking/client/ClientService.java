@@ -19,13 +19,10 @@ class ClientService {
 
   private final ClientRepository clientRepository;
 
-  private PeselService peselService;
-
   @Autowired
-  ClientService(ClientRepository clientRepository, PeselService peselService) {
+  ClientService(ClientRepository clientRepository) {
 
     this.clientRepository = clientRepository;
-    this.peselService = peselService;
   }
 
   List<ClientDto> getClients() {
@@ -52,22 +49,12 @@ class ClientService {
   Long createClient(ClientDto clientDto) {
     log.info("Dodajemy nowego klienta");
     ClientEntity clientEntity = ClientEntity.createInstance(clientDto);
-    validateClient(clientEntity);
+    verifyClientExists(clientEntity);
     clientRepository.save(clientEntity);
     return clientEntity.getId();
   }
 
-  void validateClient(ClientEntity clientEntity){
-    if(!clientEntity.isForeigner()){
-      peselService.validatePesel(clientEntity.getPesel());
-    }
-    else{
-      clientEntity.setPesel(peselService.generatePeselForForeigner(clientEntity.getBirthDate(),clientEntity.getName(),clientEntity.getSurname()));
-    }
-    verifyPersonalData(clientEntity);
-  }
-
-  void verifyPersonalData(ClientEntity clientEntity) {
+  void verifyClientExists(ClientEntity clientEntity) {
     Optional<ClientEntity> clientEntityOptional = clientRepository.findClientByPesel(clientEntity.getPesel());
     if(clientEntityOptional.isPresent()) {
       ClientEntity clientEntityDB = clientEntityOptional.get();
