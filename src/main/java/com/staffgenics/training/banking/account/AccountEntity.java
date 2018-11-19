@@ -31,6 +31,8 @@ public class AccountEntity {
   @Version
   private Long version;
 
+  private boolean deleted;
+
   static AccountEntity createInstance(AccountDto accountDto, CurrencyEntity currencyEntity) {
     AccountEntity accountEntity = new AccountEntity();
     accountEntity.setClientId(accountDto.getClientId());
@@ -38,6 +40,7 @@ public class AccountEntity {
     accountEntity.setCurrency(currencyEntity);
     accountEntity.setBalance(BigDecimal.ZERO);
     accountEntity.setVersion(accountDto.getVersion());
+    accountEntity.setDeleted(accountDto.isDeleted());
     return accountEntity;
   }
 

@@ -78,8 +78,18 @@ public class AccountService {
   }
 
   private void updateAccounts(AccountEntity sourceAccount, AccountEntity destinationAccount, BigDecimal amount){
-    sourceAccount.subtractBalance(amount);
-    destinationAccount.addBalance(amount);
+    String sourceCurrency = sourceAccount.getCurrency().getCode();
+    String destinationCurrency = destinationAccount.getCurrency().getCode();
+    if(sourceCurrency.equals(destinationCurrency)) {
+      sourceAccount.subtractBalance(amount);
+      destinationAccount.addBalance(amount);
+    } else if(sourceCurrency.equals("PLN")){
+      sourceAccount.subtractBalance(amount);
+      destinationAccount.addBalance(exchangePlnAmountToOtherCurrency(amount, destinationCurrency));
+    } else if(destinationCurrency.equals("PLN")){
+      sourceAccount.subtractBalance(amount);
+      destinationAccount.addBalance(exchangeAmountToPLN(destinationCurrency, amount));
+    }
     AccountEntity accountEntity = accountRepository.findById(sourceAccount.getId()).get();
     if (!sourceAccount.getVersion().equals(accountEntity.getVersion())) {
       throw new OptimisticLockException("Błąd edycji, odśwież dane.");
@@ -90,6 +100,16 @@ public class AccountService {
       throw new OptimisticLockException("Błąd edycji, odśwież dane.");
     }
     accountRepository.save(destinationAccount);
+  }
+
+  private BigDecimal exchangeAmountToPLN(String currency, BigDecimal amount){
+    BigDecimal exchangeRate = currencyRepository.getOne(currency).getExchangeRate();
+    return amount.multiply(exchangeRate);
+  }
+
+  private BigDecimal exchangePlnAmountToOtherCurrency(BigDecimal amount, String currency){
+    BigDecimal exchangeRate = currencyRepository.getOne(currency).getExchangeRate();
+    return amount.multiply(exchangeRate);
   }
 
   List<OperationDto> findOperations(SearchOperationDto searchOperationDto, Long id){
@@ -112,5 +132,19 @@ public class AccountService {
           .collect(Collectors.toList()));
     }
     return operationList;
+  }
+
+  public void deleteAccountsByClientId(Long clientId) {
+    List<AccountEntity> accountEntityList = accountRepository.findAccountsByClientId(clientId);
+    for (AccountEntity accountEntity: accountEntityList) {
+      accountRepository.delete(accountEntity);
+    }
+  }
+  public void setAccountsFlagDeleted(Long clientId) {
+    List<AccountEntity> accountEntityList = accountRepository.findAccountsByClientId(clientId);
+    for (AccountEntity accountEntity: accountEntityList) {
+      accountEntity.setDeleted(true);
+    }
+    accountRepository.saveAll(accountEntityList);
   }
 }

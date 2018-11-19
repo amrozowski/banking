@@ -42,4 +42,14 @@ public class ClientController {
   public void createClient(@RequestBody ClientDto clientDto, @PathVariable Long id) {
     clientService.editClient(clientDto, id);
   }
+
+  @RequestMapping(value = "/client/{id}", method = RequestMethod.DELETE)
+  public void removeClient(@PathVariable Long id) {
+    clientService.removeClient(id);
+  }
+
+  @RequestMapping(value = "/client/flag/{id}", method = RequestMethod.DELETE)
+  public void setClientFlagDelete(@PathVariable Long id) {
+    clientService.setClientFlagDeleted(id);
+  }
 }

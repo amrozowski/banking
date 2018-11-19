@@ -23,7 +23,8 @@ public class CardNumberService {
         throw new IllegalStateException("Błąd generacji numeru karty, przekroczono maksymalną liczbę prób");
       }
       Random rand = new Random();
-      cardNumber = String.format ("%09d", rand.nextInt(1000000000));
+      cardNumber = String.format ("%08d", rand.nextInt(100000000));
+      cardNumber += String.format ("%08d", rand.nextInt(100000000));
       generationTry++;
     } while (checkCardNumberInRepository(cardNumber));
     return cardNumber;

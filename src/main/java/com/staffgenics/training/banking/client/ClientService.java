@@ -4,9 +4,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.staffgenics.training.banking.account.AccountService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.OptimisticLockException;
 
@@ -18,11 +20,13 @@ import javax.persistence.OptimisticLockException;
 class ClientService {
 
   private final ClientRepository clientRepository;
+  private final AccountService accountService;
 
   @Autowired
-  ClientService(ClientRepository clientRepository) {
+  ClientService(ClientRepository clientRepository, AccountService accountService) {
 
     this.clientRepository = clientRepository;
+    this.accountService = accountService;
   }
 
   List<ClientDto> getClients() {
@@ -81,5 +85,19 @@ class ClientService {
     return clientRepository.findClientByCriteria(searchClientDto.getName(), searchClientDto.getSurname(), searchClientDto.getSecondName()).stream()
           .map(ClientDto::createInstance)
           .collect(Collectors.toList());
+  }
+  @Transactional
+  public void removeClient(Long clientId){
+    accountService.deleteAccountsByClientId(clientId);
+    ClientEntity clientEntity = findClient(clientId);
+    clientRepository.delete(clientEntity);
+  }
+
+  @Transactional
+  public void setClientFlagDeleted(Long clientId){
+    accountService.setAccountsFlagDeleted(clientId);
+    ClientEntity clientEntity = findClient(clientId);
+    clientEntity.setDeleted(true);
+    clientRepository.save(clientEntity);
   }
 }

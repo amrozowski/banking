@@ -12,6 +12,8 @@ CREATE TABLE client (
 );
 COMMENT ON TABLE client IS 'Klienci banku';
 
+ALTER TABLE client ADD deleted BOOLEAN NOT NULL DEFAULT FALSE;
+
 CREATE TABLE currency (
   code VARCHAR(3) NOT NULL,
   label VARCHAR(50) NOT NULL,
@@ -42,4 +44,51 @@ CREATE TABLE account (
   CONSTRAINT uq_account_account_number UNIQUE (account_number)
 );
 COMMENT ON TABLE account IS 'Konta klientów banku';
+
+ALTER TABLE account ADD deleted BOOLEAN NOT NULL DEFAULT FALSE;
+
+CREATE TABLE card (
+  id BIGSERIAL NOT NULL,
+  type VARCHAR(4) NOT NULL,
+  card_number VARCHAR(16) NOT NULL,
+  cvv_code VARCHAR(3) NOT NULL,
+  account_id INT8 NOT NULL,
+  create_date DATE NOT NULL,
+  valid_thru INT8 NOT NULL,
+  CONSTRAINT pk_card PRIMARY KEY (id)
+);
+
+<!--Zadanie 1 - zajęcia 4 -->
+select acc.account_number , count(acc.id = oper.source_account_id or acc.account_number = oper.destination_account_number)
+from account acc , operation oper
+where (acc.id = oper.source_account_id or acc.account_number = oper.destination_account_number)
+group by acc.id
+having count(acc.id = oper.source_account_id or acc.account_number = oper.destination_account_number) <7
+
+<!--Zadanie 2 - zajęcia 4 -->
+select c.id, sum(a.balance)
+from client c
+join account a on c.id = a.client_id
+group by c.id
+order by 2 desc
+limit 5
+
+<!--Zadanie 3 - zajęcia 4 -->
+select a.id, max(a.balance)
+from client c
+join account a on c.id = a.client_id
+group by a.id
+order by 2 desc, a.id asc
+offset 1
+limit 1
+
+<!--Zadanie 3 (lepsza wersja, ale trzeba jeszcze opakować) - zajęcia 4 -->
+select
+row_number() over(partition by suma order by suma) as lp,
+*
+from (select a.id, max(a.balance) as suma
+from client c
+join account a on c.id = a.client_id
+group by a.id) as dane
+order by 3 desc
 

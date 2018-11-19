@@ -35,7 +35,7 @@ public class CardEntity {
     CardEntity cardEntity = new CardEntity();
     cardEntity.setType(cardDto.getType());
     cardEntity.setAccountId(cardDto.getAccountId());
-    cardEntity.setCreateDate(cardDto.getCreateDate());
+    cardEntity.setCreateDate(new Date());
     cardEntity.setValidThru(cardDto.getValidThru());
     return cardEntity;
   }

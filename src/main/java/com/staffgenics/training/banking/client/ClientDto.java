@@ -32,6 +32,8 @@ public class ClientDto {
 
   private Long version;
 
+  private boolean deleted;
+
   static ClientDto createInstance(ClientEntity clientEntity) {
     ClientDto clientDto = new ClientDto();
     clientDto.setId(clientEntity.getId());
@@ -42,6 +44,7 @@ public class ClientDto {
     clientDto.setVip(clientEntity.isVip());
     clientDto.setForeigner(clientEntity.isForeigner());
     clientDto.setBirthDate(clientEntity.getBirthDate());
+    clientDto.setDeleted(clientEntity.isDeleted());
     return clientDto;
   }
 }
