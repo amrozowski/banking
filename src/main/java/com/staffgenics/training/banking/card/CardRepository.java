@@ -10,4 +10,7 @@ public interface CardRepository extends JpaRepository<CardEntity, Long> {
 
   @Query("SELECT card FROM CardEntity card WHERE card.cardNumber = :cardNumber")
   Optional<CardEntity> findCardByCardNumber(String cardNumber);
+
+  @Query("SELECT card FROM CardEntity card WHERE card.accountId = :accountId")
+  Optional<CardEntity> findCardByAccountId(Long accountId);
 }

@@ -1,6 +1,5 @@
 package com.staffgenics.training.banking.card;
 
-import com.staffgenics.training.banking.account.AccountEntity;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -11,6 +10,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+
+import java.util.Optional;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CardServiceMockitoTest {
@@ -35,6 +36,11 @@ public class CardServiceMockitoTest {
       cardEntity = invocation.getArgument(0);
       cardEntity.setId(1L);
       return cardEntity;
+    });
+    Mockito.when(cardRepository.findCardByAccountId(Mockito.any(Long.class))).thenAnswer((Answer<Optional<CardEntity>>) invocation -> {
+      cardEntity = new CardEntity();
+      cardEntity.setId(1L);
+      return Optional.of(cardEntity);
     });
   }
 

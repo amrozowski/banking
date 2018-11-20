@@ -62,6 +62,9 @@ public class AccountServiceMockitoTest {
     Long destinationAccountId = 2L;
     Mockito.when(accountRepository.findById(sourceAccountId)).thenAnswer((Answer<Optional<AccountEntity>>) invocation -> {
       sourceAccountEntity.setId(invocation.getArgument(0));
+      CurrencyEntity currency = new CurrencyEntity();
+      currency.setCode("PLN");
+      sourceAccountEntity.setCurrency(currency);
       if(sourceAccountEntity.getBalance() == null){
         sourceAccountEntity.setBalance(sourceAccountBalance);
       }
@@ -72,6 +75,9 @@ public class AccountServiceMockitoTest {
     });
     Mockito.when(accountRepository.findById(destinationAccountId)).thenAnswer((Answer<Optional<AccountEntity>>) invocation -> {
       destiantionAccountEntity.setId(invocation.getArgument(0));
+      CurrencyEntity currency = new CurrencyEntity();
+      currency.setCode("PLN");
+      destiantionAccountEntity.setCurrency(currency);
       destiantionAccountEntity.setVersion(0L);
       Optional<AccountEntity> accountEnitityOptional;
       accountEnitityOptional = Optional.of(destiantionAccountEntity);
@@ -82,6 +88,9 @@ public class AccountServiceMockitoTest {
       destiantionAccountEntity.setAccountNumber(invocation.getArgument(0));
       destiantionAccountEntity.setBalance(destinationAccountBalance);
       destiantionAccountEntity.setId(2L);
+      CurrencyEntity currency = new CurrencyEntity();
+      currency.setCode("PLN");
+      destiantionAccountEntity.setCurrency(currency);
       destiantionAccountEntity.setVersion(0L);
       Optional<AccountEntity> accountEnitityOptional;
       accountEnitityOptional = Optional.of(destiantionAccountEntity);

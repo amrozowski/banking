@@ -88,7 +88,7 @@ public class AccountService {
       destinationAccount.addBalance(exchangePlnAmountToOtherCurrency(amount, destinationCurrency));
     } else if(destinationCurrency.equals("PLN")){
       sourceAccount.subtractBalance(amount);
-      destinationAccount.addBalance(exchangeAmountToPLN(destinationCurrency, amount));
+      destinationAccount.addBalance(exchangeAmountToPLN(sourceCurrency, amount));
     }
     AccountEntity accountEntity = accountRepository.findById(sourceAccount.getId()).get();
     if (!sourceAccount.getVersion().equals(accountEntity.getVersion())) {
@@ -109,7 +109,7 @@ public class AccountService {
 
   private BigDecimal exchangePlnAmountToOtherCurrency(BigDecimal amount, String currency){
     BigDecimal exchangeRate = currencyRepository.getOne(currency).getExchangeRate();
-    return amount.multiply(exchangeRate);
+    return amount.divide(exchangeRate);
   }
 
   List<OperationDto> findOperations(SearchOperationDto searchOperationDto, Long id){
