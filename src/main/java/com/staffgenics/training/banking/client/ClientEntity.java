@@ -2,6 +2,7 @@ package com.staffgenics.training.banking.client;
 
 import javax.persistence.*;
 
+import com.staffgenics.training.banking.exception.ClientBadRequestException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -68,7 +69,7 @@ public class ClientEntity {
   private void validatePesel(){
     //length
     if (pesel.length() != 11) {
-      throw new IllegalArgumentException("Budowa numeru PESEL nie jest poprawna.");
+      throw new ClientBadRequestException("Budowa numeru PESEL nie jest poprawna.");
     }
     //allDigits and checksum
     boolean allDigits = true;
@@ -80,7 +81,7 @@ public class ClientEntity {
       if (Character.isDigit(pesel.charAt(i))){
         allDigits = true;
       } else {
-        throw new IllegalArgumentException("Budowa numeru PESEL nie jest poprawna.");
+        throw new ClientBadRequestException("Budowa numeru PESEL nie jest poprawna.");
       }
       //checksum
       if (i!=10) checkSum += (weights[i] * Character.getNumericValue(pesel.charAt(i))) % 10;
@@ -88,7 +89,7 @@ public class ClientEntity {
     checkSum = 10 - (checkSum % 10);
     boolean isCheckSumValid = checkSum == Character.getNumericValue(pesel.charAt(pesel.length() - 1));
     if (!isCheckSumValid){
-      throw new IllegalArgumentException("Budowa numeru PESEL nie jest poprawna.");
+      throw new ClientBadRequestException("Budowa numeru PESEL nie jest poprawna.");
     }
   }
 

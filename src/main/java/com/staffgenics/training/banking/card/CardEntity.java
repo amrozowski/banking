@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -19,7 +20,8 @@ public class CardEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private String type;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  private CardTypeEntity cardType;
 
   private String cardNumber;
 
@@ -29,14 +31,19 @@ public class CardEntity {
 
   private Date createDate;
 
-  private int validThru;
+  private LocalDate validThruDate;
 
-  static CardEntity createInstance(CardDto cardDto){
+  private boolean active;
+
+  static CardEntity createInstance(CardDto cardDto, LocalDate validThruDate, String cardNumber, String cvv, CardTypeEntity type){
     CardEntity cardEntity = new CardEntity();
-    cardEntity.setType(cardDto.getType());
+    cardEntity.setCardType(type);
+    cardEntity.setCardNumber(cardNumber);
+    cardEntity.setCvvCode(cvv);
     cardEntity.setAccountId(cardDto.getAccountId());
     cardEntity.setCreateDate(new Date());
-    cardEntity.setValidThru(cardDto.getValidThru());
+    cardEntity.setValidThruDate(validThruDate);
+    cardEntity.setActive(true);
     return cardEntity;
   }
 }

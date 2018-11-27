@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @NoArgsConstructor
@@ -23,17 +24,20 @@ public class CardDto {
 
   private Date createDate;
 
-  private int validThru;
+  private LocalDate validThruDate;
+
+  private boolean active;
 
   static CardDto createInstance(CardEntity cardEntity){
     CardDto cardDto = new CardDto();
     cardDto.setId(cardEntity.getId());
-    cardDto.setType(cardEntity.getType());
+    cardDto.setType(cardEntity.getCardType().toString());
     cardDto.setCardNumber(cardEntity.getCardNumber());
     cardDto.setCvvCode(cardEntity.getCvvCode());
     cardDto.setAccountId(cardEntity.getAccountId());
     cardDto.setCreateDate(cardEntity.getCreateDate());
-    cardDto.setValidThru(cardEntity.getValidThru());
+    cardDto.setValidThruDate(cardEntity.getValidThruDate());
+    cardDto.setActive(cardEntity.isActive());
     return cardDto;
   }
 }

@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.staffgenics.training.banking.account.AccountService;
+import com.staffgenics.training.banking.exception.ClientBadRequestException;
+import com.staffgenics.training.banking.exception.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,7 +47,7 @@ class ClientService {
   private ClientEntity findClient(Long id) {
     Optional<ClientEntity> clientEntityOptional = clientRepository.findById(id);
     if (!clientEntityOptional.isPresent()) {
-      throw new IllegalArgumentException("Brak klienta w bazie danych");
+      throw new NotFoundException("Brak klienta w bazie danych");
     }
     return clientEntityOptional.get();
   }
@@ -64,9 +66,9 @@ class ClientService {
       ClientEntity clientEntityDB = clientEntityOptional.get();
       if (clientEntity.getName().equals(clientEntityDB.getName()) && clientEntity.getSecondName().equals(clientEntityDB.getSecondName()) &&
           clientEntity.getSurname().equals(clientEntityDB.getSurname())) {
-        throw new IllegalArgumentException("Klient o podanym numerze PESEL istnieje - dane osobowe zgodne");
+        throw new ClientBadRequestException("Klient o podanym numerze PESEL istnieje - dane osobowe zgodne");
       } else{
-        throw new IllegalArgumentException("Klient o podanym numerze PESEL istnieje - dane osobowe niezgodne");
+        throw new ClientBadRequestException("Klient o podanym numerze PESEL istnieje - dane osobowe niezgodne");
       }
     }
   }

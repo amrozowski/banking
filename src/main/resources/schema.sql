@@ -6,7 +6,7 @@ CREATE TABLE client (
   second_name VARCHAR(20),
   vip BOOLEAN NOT NULL,
   foreigner BOOLEAN NOT NULL,
-  birthDate DATE NOT NULL,
+  birth_date DATE NOT NULL,
   version INT8 DEFAULT 0,
   CONSTRAINT pk_client PRIMARY KEY (id)
 );
@@ -49,7 +49,7 @@ ALTER TABLE account ADD deleted BOOLEAN NOT NULL DEFAULT FALSE;
 
 CREATE TABLE card (
   id BIGSERIAL NOT NULL,
-  type VARCHAR(4) NOT NULL,
+  card_type_code VARCHAR(4) NOT NULL,
   card_number VARCHAR(16) NOT NULL,
   cvv_code VARCHAR(3) NOT NULL,
   account_id INT8 NOT NULL,
@@ -57,6 +57,18 @@ CREATE TABLE card (
   valid_thru INT8 NOT NULL,
   CONSTRAINT pk_card PRIMARY KEY (id)
 );
+
+ALTER TABLE card ADD CONSTRAINT fk_card_type FOREIGN KEY (card_type_code) REFERENCES card_type(code);
+
+CREATE TABLE card_type (
+  code VARCHAR(4) NOT NULL,
+  label VARCHAR(50) NOT NULL,
+  CONSTRAINT pk_card_type PRIMARY KEY (id)
+);
+
+ALTER TABLE card DROP COLUMN valid_thru;
+ALTER TABLE card ADD valid_thru_date DATE NOT NULL;
+ALTER TABLE card ADD active BOOLEAN NOT NULL DEFAULT TRUE;
 
 <!--Zadanie 1 - zajęcia 4 -->
 select acc.account_number , count(acc.id = oper.source_account_id or acc.account_number = oper.destination_account_number)

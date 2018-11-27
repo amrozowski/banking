@@ -3,6 +3,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import com.staffgenics.training.banking.exception.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,7 +66,7 @@ public class AccountService {
   private AccountEntity verifyAccountExists(Long id){
     Optional<AccountEntity> accountEnitityOptional = accountRepository.findById(id);
     if (!accountEnitityOptional.isPresent()) {
-      throw new IllegalArgumentException("Brak konta w bazie danych");
+      throw new NotFoundException("Brak konta w bazie danych");
     }
     return accountEnitityOptional.get();
   }
@@ -72,7 +74,7 @@ public class AccountService {
   private AccountEntity verifyAccountExist(String accountNumber){
     Optional<AccountEntity> accountEnitityOptional = accountRepository.findByNRB(accountNumber);
     if(!accountEnitityOptional.isPresent()){
-      throw new IllegalArgumentException("Brak konta w bazie danych");
+      throw new NotFoundException("Brak konta w bazie danych");
     }
     return accountEnitityOptional.get();
   }

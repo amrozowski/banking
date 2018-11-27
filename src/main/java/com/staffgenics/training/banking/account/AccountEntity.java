@@ -1,5 +1,6 @@
 package com.staffgenics.training.banking.account;
 
+import com.staffgenics.training.banking.exception.ClientBadRequestException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -46,7 +47,7 @@ public class AccountEntity {
 
   void subtractBalance(BigDecimal amount){
     if(balance.compareTo(amount) < 0){
-      throw new IllegalArgumentException("Brak środków na koncie");
+      throw new ClientBadRequestException("Brak środków na koncie");
     }
     BigDecimal newBalance = balance.subtract(amount);
     setBalance(newBalance);
