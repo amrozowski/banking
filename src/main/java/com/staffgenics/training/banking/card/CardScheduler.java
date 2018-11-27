@@ -17,9 +17,9 @@ public class CardScheduler {
   }
 
 
-  //@Scheduled(cron = "${banking.cronPeriodity}")
-  //void executeJob(){
-  //  log.info("verifyAllCardsExpireTime");
-  //  cardService.verifyAllCardsExpireTime();
-  //}
+  @Scheduled(cron = "${banking.cronPeriodity}")
+  void executeJob(){
+    log.info("verifyAllCardsExpireTime");
+    cardService.verifyAllCardsExpireTime();
+  }
 }
